@@ -1,0 +1,2 @@
+# run apk update - runs daily at 2 am
+0 2 * * * root ping -c 1 google.com >/dev/null 2>&1 && apk update -q && apk upgrade -q >/dev/null 2>&1
