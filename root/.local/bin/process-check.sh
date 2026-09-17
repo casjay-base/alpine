@@ -39,23 +39,23 @@ PROCS="nginx httpd postfix crond dockerd sshd php-fpm "
 __check_url() { curl -q -LSsfI --max-time 3 --max-time 2 --retry 1 "$1" >/dev/null 2>&1 || return 1; }
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 __proc_check() {
-  proc="$(ps aux 2>&1 | grep -v -- 'grep' | grep -w -- "$1" | head -n1 | grep -q -- "$1" && echo "$1" || false)"
+  local proc="$(ps aux 2>&1 | grep -v -- 'grep' | grep -w -- "$1" | head -n1 | grep -q -- "$1" && echo "$1" || false)"
   [ -n "$proc" ] || return 1
 }
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 __get_proc_port() {
-  port="$(netstat -tapln | grep -- "$1" | tr ' ' '\n' | grep -v -- '^$' | grep -- ':[0-9]' | head -n 1 | sed 's|.*:||g' | head -n1 | grep -- '[0-9]' || false)"
+  local port="$(netstat -tapln | grep -- "$1" | tr ' ' '\n' | grep -v -- '^$' | grep -- ':[0-9]' | head -n 1 | sed 's|.*:||g' | head -n1 | grep -- '[0-9]' || false)"
   [ -n "$port" ] && printf '%s\n' "$port" || return 1
 }
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 __website_check() {
-  check="$(__get_proc_port "$1")"
-  url="${2:-}"
+  local check="$(__get_proc_port "$1")"
+  local url="${2:-}"
   [ -n "$check" ] && [ -n "$url" ] && __check_url "${url%:*}" || return 1
 }
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 __service_restart() {
-  exitcode=0
+  local exitcode=0
   systemctl list-unit-files | grep -qw -- "$1" || return 0
   systemctl restart "$1" &>/dev/null 2>&1
   systemctl is-active "$1" &>/dev/null || exitcode=1
